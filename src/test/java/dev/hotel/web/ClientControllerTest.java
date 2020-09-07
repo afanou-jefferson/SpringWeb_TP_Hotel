@@ -1,6 +1,7 @@
 package dev.hotel.web;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class ClientControllerTest {
 	}
 
 	@Test
-	public void testerGetClient() throws Exception {
+	public void testerGetClientIDValide() throws Exception {
 
 		Client c1 = new Client();
 		c1.setNom("Caillou");
@@ -59,6 +60,26 @@ public class ClientControllerTest {
 
 		// Get /clients/UUID
 		mockMvc.perform(MockMvcRequestBuilders.get("/clients/" + c1.getUuid()))
+				.andExpect(MockMvcResultMatchers.jsonPath("nom").value("Caillou"))
+				.andExpect(MockMvcResultMatchers.jsonPath("prenoms").value("Pierre"));
+	}
+
+	@Test
+	public void testerGetClientIdNonValide() throws Exception {
+		Client c1 = new Client();
+		mockMvc.perform(MockMvcRequestBuilders.get("/clients/" + c1.getUuid())).andExpect(status().is4xxClientError());
+	}
+
+	@Test
+	public void testPostClientValide() throws Exception {
+		Client c1 = new Client();
+		c1.setNom("Caillou");
+		c1.setPrenoms("Pierre");
+
+		when(clientRepository.save(c1)).thenReturn(c1);
+
+		// post?nomClient=x&prenomClient=y
+		mockMvc.perform(MockMvcRequestBuilders.get("/post?nomClient=Caillou&prenomClient=Pierre"))
 				.andExpect(MockMvcResultMatchers.jsonPath("nom").value("Caillou"))
 				.andExpect(MockMvcResultMatchers.jsonPath("prenoms").value("Pierre"));
 	}
